@@ -1,85 +1,36 @@
-import { useState } from "react";
-import Square from "./components/Square";
+import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
+import store from './app/store';
+import { Provider } from 'react-redux';
 
-import calculateWinner from "./utils/calculateWinner";
+import AppMenu from "./components/AppMenu";
+import ScreenHeader from "./components/ScreenHeader";
+
+import JogoDaVelhaScreen from "./screens/JogoDaVelha";
+import TodoListScreen from "./screens/TodoList";
+
+import { TodoProvider } from "./contexts/TodoContext";
+
+
 
 function App() {
-  const [displayMove, setDisplayMove] = useState(0);
-  const [history, setHistory] = useState([[null, null, null, null, null, null, null, null, null]]);
-
-  const reset = () => {
-    setDisplayMove(0);
-    setHistory([[null, null, null, null, null, null, null, null, null]]);
-  };
-
-  const handleClick = (index) => {
-    const currentSquares = history[history.length - 1];
-    const newSquares = [...currentSquares];
-    newSquares[index] = nextPlayer;
-    setHistory([...history, newSquares]);
-    setDisplayMove(displayMove + 1);
-  };
-
-  const showPreviousMove = () => {
-    if (displayMove > 0) {
-      setDisplayMove(displayMove - 1);
-    }
-  };
-
-  const showNextMove = () => {
-    if (displayMove + 1 < history.length) {
-      setDisplayMove(displayMove + 1);
-    }
-  };
-
-  const nextPlayer = displayMove % 2 === 0 ? "X" : "O";
-  const squares = history[displayMove];
-  const winner = calculateWinner(squares);
-  const fullBoard = !squares.includes(null);
-  const deuVelha = fullBoard && !winner;
-  const isPast = displayMove < history.length - 1;
-
   return (
-    <div className="w-full flex items-center justify-center">
-      <div className="border border-blue-500 rounded-xl mt-20">
-        <h1 className="text-xxl font-bold p-2">Jogo da Velha</h1>
-        <h1 className="text-xxl font-bold p-2">Proximo a jogar: {nextPlayer}</h1>
+    <Provider store={store}>
+      <TodoProvider>
+      <BrowserRouter>
+        <div className="min-h-full">
+          <AppMenu />
 
-        {nextPlayer == "X" ? (
-          <h1 className="text-xxl font-bold p-2">XISSS</h1>
-        ) : (
-          <h1 className="text-xxl font-bold p-2">Bolinha</h1>
-        )}
-
-        {winner && <h1 className="text-xxl font-bold p-2">Vencedor é: {winner}</h1>}
-        {deuVelha && <h2 className="font-bold p-2 text-red-500 bg-red-100">DEU VELHAA</h2>}
-
-        {(winner || deuVelha) && <button onClick={reset} className="px-2 border rounded">RESET</button>}
-        <div className="border rounded w-56 grid grid-cols-3">
-          {squares.map((value, index) => {
-            return (
-              <Square
-                key={index}
-                value={value}
-                onClick={() => handleClick(index)}
-                disabled={winner || isPast}
-              />
-            );
-          })}
+          <main>
+            <Routes>
+              <Route path="/jogo_da_velha" element={<JogoDaVelhaScreen />} />
+              <Route path="/todo_list" element={<TodoListScreen />} />
+            </Routes>
+          </main>
         </div>
-        <div className="flex justify-around">
-          <button className="border rounded px-2" onClick={showPreviousMove}>
-            {"<"}
-          </button>
-          <span>
-            move {displayMove} de {history.length - 1}
-          </span>
-          <button className="border rounded px-2" onClick={showNextMove}>
-            {">"}
-          </button>
-        </div>
-      </div>
-    </div>
+      </BrowserRouter>
+    </TodoProvider>
+    </Provider>
+    
   );
 }
 
